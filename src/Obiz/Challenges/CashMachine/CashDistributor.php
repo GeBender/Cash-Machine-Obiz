@@ -7,8 +7,8 @@ class CashDistributor
     /**
      * @var array
      */
-    private $availableBills = array(2, 5, 10, 20, 50, 100);
-     
+    private $availableBills = array(100, 50, 20, 10, 5, 2);
+
     /**
      * Returns the bills that should be distributed for a given withdraw amount and available bills,
      * MINIMIZING the total number of distributed bills.
@@ -20,6 +20,23 @@ class CashDistributor
      */
     public function getMinimalAmountOfBills($withdrawAmount)
     {
-        // Write your code here. Feel free to create any other functions or classes you need.
+        $billsCollection = array();
+        foreach ($this->availableBills as $v) {
+            $bills = $this->getMaximunBills($v);
+        }
+        throw new InvalidWithdrawException('Sorry, the exact amount cannot be gathered. Please try again.');
+
     }
+
+
+    /**
+     * Returns the maximun amount of bills for a bill value
+     * @param int $value The bill value
+     * @return int
+     */
+    public function getMaximunBills($value)
+    {
+        return 2;
+    }
+
 }

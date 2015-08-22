@@ -83,6 +83,16 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
         $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount);
     }
 
+
+    public function testShoudReturnTheMaximunAmountOfBillsForBillValue()
+    {
+        $cashDistributor = new CashDistributor();
+        $this->assertEquals(2, $cashDistributor->getMaximunBills(200));
+        $this->assertEquals(3, $cashDistributor->getMaximunBills(150));
+
+    }
+
+
     /**
      * @dataProvider validWithdrawProvider
      */
