@@ -1,0 +1,7 @@
+vendor
+composer.phar
+composer.lock
+*.sublime-*
+.settings
+.buildpath
+.project
