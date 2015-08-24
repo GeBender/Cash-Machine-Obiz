@@ -73,25 +73,115 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
             'Obiz\Challenges\CashMachine\CashDistributor', $cashDistributor);
     }
 
-    /**
-     * @dataProvider invalidWithdrawProvider
-     * @expectedException Obiz\Challenges\CashMachine\InvalidWithdrawException
-     */
-    public function testShouldThrowExceptionForInvalidWithdraw($withdrawAmount)
+    public function testShouldCreateArrayKeyWhenFirstBill()
     {
         $cashDistributor = new CashDistributor();
-        $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount);
-    }
+        $expected = array(100 => 1);
 
-
-    public function testShoudReturnTheMaximunAmountOfBillsForBillValue()
-    {
-        $cashDistributor = new CashDistributor();
-        $this->assertEquals(2, $cashDistributor->getMaximunBills(200));
-        $this->assertEquals(3, $cashDistributor->getMaximunBills(150));
+        $cashDistributor->addBill(100);
+        $this->assertEquals($expected, $cashDistributor->bills);
 
     }
 
+    public function testShouldNotValidateZeroBills()
+    {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateAmount(0, 10);
+
+        $this->assertFalse($actual);
+
+    }
+
+
+    public function testShouldNotValidateWhenLeftOne()
+    {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateAmount(1, 1);
+
+        $this->assertFalse($actual);
+
+    }
+
+
+    public function testShouldNotValidateWhenLeftThree()
+    {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateAmount(1, 3);
+
+        $this->assertFalse($actual);
+
+    }
+
+
+    public function testShouldValidateWhenLeftValideValueAndSomeBill()
+    {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateAmount(1, 4);
+
+        $this->assertTrue($actual);
+
+    }
+
+    public function testShouldReturnIntBillAmount()
+    {
+        $cashDistributor = new CashDistributor();
+        $expected = 2;
+        $actual = $cashDistributor->getBills(230, 100);
+
+        $this->assertEquals($expected, $actual);
+
+    }
+
+    public function testShouldInvalidateResultWithNoBills() {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateWithdraw();
+
+        $this->assertFalse($actual);
+
+    }
+
+
+    public function testShouldValidateResultWithBills() {
+        $cashDistributor = new CashDistributor();
+        $cashDistributor->bills[100] = 1;
+        $actual = $cashDistributor->validateWithdraw();
+
+        $this->assertTrue($actual);
+
+    }
+
+
+    public function testShouldReturnFlooredBillAmount()
+    {
+        $cashDistributor = new CashDistributor();
+        $expected = 1;
+        $actual = $cashDistributor->getBills(190, 100);
+
+        $this->assertEquals($expected, $actual);
+
+    }
+
+
+    public function testShouldReturnIntABillWhenValueFixToSomeBillAvaliable()
+    {
+        $cashDistributor = new CashDistributor();
+        $expected = 50;
+        $actual = $cashDistributor->getOneBill(70);
+
+        $this->assertEquals($expected, $actual);
+
+    }
+
+    public function testShouldIncrementKeyWhenNotFirstBill()
+    {
+        $cashDistributor = new CashDistributor();
+        $cashDistributor->bills[100] = 1;
+        $expected = array(100 => 2);
+
+        $cashDistributor->addBill(100);
+        $this->assertEquals($expected, $cashDistributor->bills);
+
+    }
 
     /**
      * @dataProvider validWithdrawProvider
