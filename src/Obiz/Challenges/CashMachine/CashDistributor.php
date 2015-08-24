@@ -42,7 +42,7 @@ class CashDistributor
     }
 
     /**
-     * Set the maximun amount of bills for a bill value
+     * Return one bill, the best one.
      *
      * @param int $value
      * @return int
