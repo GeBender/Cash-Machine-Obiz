@@ -45,7 +45,6 @@ class CashDistributor
      * Set the maximun amount of bills for a bill value
      *
      * @param int $value
-     *
      * @return int
      */
     public function getOneBill($value)
@@ -63,6 +62,13 @@ class CashDistributor
     }
 
 
+    /**
+     * Calculate the number of bills to use
+     * @param int $value
+     * @param int $bill
+     *
+     * @return int
+     */
     public function getBills($value, $bill)
     {
         return (int) floor($value / $bill);
@@ -70,6 +76,13 @@ class CashDistributor
     }
 
 
+    /**
+     * Validate the bill amount based on the left over value
+     * @param int $billAmount
+     * @param int $leftOver
+     *
+     * @return boolean
+     */
     public function validateAmount($billAmount, $leftOver)
     {
         if ($billAmount > 0 && $leftOver !== 3 && $leftOver !== 1) {
@@ -81,6 +94,10 @@ class CashDistributor
     }
 
 
+    /**
+     * Add a defined bill to final bills array
+     * @param int $bill
+     */
     public function addBill($bill)
     {
         if (isset($this->bills[$bill]) === false) {
@@ -92,6 +109,10 @@ class CashDistributor
     }
 
 
+    /**
+     * Validate if the Withdraw is possible or not
+     * @return boolean
+     */
     public function validateWithdraw()
     {
         return (bool) count($this->bills);

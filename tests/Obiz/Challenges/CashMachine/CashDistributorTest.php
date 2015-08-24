@@ -162,11 +162,22 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testShouldReturnIntABillWhenValueFixToSomeBillAvaliable()
+    public function testShouldReturnABillWhenValueFixToSomeBillAvaliable()
     {
         $cashDistributor = new CashDistributor();
         $expected = 50;
         $actual = $cashDistributor->getOneBill(70);
+
+        $this->assertEquals($expected, $actual);
+
+    }
+
+
+    public function testShouldReturnATwoBillWhenValueNotFixToSomeBillAvaliable()
+    {
+        $cashDistributor = new CashDistributor();
+        $expected = 2;
+        $actual = $cashDistributor->getOneBill(1);
 
         $this->assertEquals($expected, $actual);
 
