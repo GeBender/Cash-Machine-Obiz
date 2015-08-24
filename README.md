@@ -9,5 +9,7 @@ To cover a few broked tests I spend more time that I wished, stuck at a wrong ap
 #About the Tests
 I also wrote more tests , covering all the new methods. We got now 42 tests with 100% code coverage.
 
+
 It was a nice exercise, I hope you like. I'll be waiting the answer.
+
 Thanks
