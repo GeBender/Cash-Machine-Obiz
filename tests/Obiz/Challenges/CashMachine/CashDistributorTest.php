@@ -31,6 +31,20 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+
+    public function invalidWithdrawProvider2()
+    {
+        $availableBills = array(30, 7, 150, 9, 12);
+        return array(
+            array(6),
+            array(4),
+            array(8),
+            array(10),
+            array(15),
+            array(20),
+        );
+    }
+
     public function validWithdrawProvider()
     {
         return array(
@@ -63,6 +77,17 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
             array(178, array(100 => 1, 50 => 1, 20 => 1, 2 => 4)),
             array(252, array(100 => 2, 50 => 1, 2 => 1)),
             array(296, array(100 => 2, 50 => 1, 20 => 2, 2 => 3)),
+        );
+    }
+
+    public function validWithdrawProvider2()
+    {
+        return array(
+            array(150, array(150 => 1)),
+            array(24, array(12 => 2)),
+            array(166, array(150 => 1, 9 => 1, 7 => 1)),
+            array(318, array(150 => 2, 9 => 2)),
+
         );
     }
 
@@ -116,6 +141,7 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     public function testShouldValidateWhenLeftValideValueAndSomeBill()
     {
         $cashDistributor = new CashDistributor();
+        $cashDistributor->availableBills = array(100, 50, 20, 10, 5, 2);
         $actual = $cashDistributor->validateAmount(1, 4);
 
         $this->assertTrue($actual);
@@ -134,7 +160,15 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
 
     public function testShouldInvalidateResultWithNoBills() {
         $cashDistributor = new CashDistributor();
-        $actual = $cashDistributor->validateWithdraw();
+        $actual = $cashDistributor->validateWithdraw(0);
+
+        $this->assertFalse($actual);
+
+    }
+
+    public function testShouldInvalidateResultWithNegativeWhthdraw() {
+        $cashDistributor = new CashDistributor();
+        $actual = $cashDistributor->validateWithdraw(-1);
 
         $this->assertFalse($actual);
 
@@ -144,7 +178,7 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     public function testShouldValidateResultWithBills() {
         $cashDistributor = new CashDistributor();
         $cashDistributor->bills[100] = 1;
-        $actual = $cashDistributor->validateWithdraw();
+        $actual = $cashDistributor->validateWithdraw(0);
 
         $this->assertTrue($actual);
 
@@ -162,10 +196,11 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testShouldReturnABillWhenValueFixToSomeBillAvaliable()
+    public function testShouldReturnABillWhenValueFixToSomeBillavailable()
     {
         $cashDistributor = new CashDistributor();
         $expected = 50;
+        $cashDistributor->availableBills = array(100, 50, 20, 10, 5, 2);
         $actual = $cashDistributor->getOneBill(70);
 
         $this->assertEquals($expected, $actual);
@@ -173,10 +208,11 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testShouldReturnATwoBillWhenValueNotFixToSomeBillAvaliable()
+    public function testShouldReturnATwoBillWhenValueNotFixToSomeBillavailable()
     {
         $cashDistributor = new CashDistributor();
         $expected = 2;
+        $cashDistributor->availableBills = array(100, 50, 20, 10, 5, 2);
         $actual = $cashDistributor->getOneBill(1);
 
         $this->assertEquals($expected, $actual);
@@ -195,16 +231,59 @@ class CashDistributorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider invalidWithdrawProvider
+     * @expectedException Obiz\Challenges\CashMachine\InvalidWithdrawException
+     */
+    public function testShouldThrowExceptionForInvalidWithdraw($withdrawAmount)
+    {
+        $cashDistributor = new CashDistributor();
+        $availableBills = array(100, 50, 20, 10, 5, 2);
+        $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount, $availableBills);
+
+    }
+
+
+    /**
+     * @dataProvider invalidWithdrawProvider2
+     * @expectedException Obiz\Challenges\CashMachine\InvalidWithdrawException
+     */
+    public function testShouldThrowExceptionForInvalidWithdraw2($withdrawAmount)
+    {
+        $cashDistributor = new CashDistributor();
+        $availableBills = array(30, 7, 150, 9, 12);
+        $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount, $availableBills);
+
+    }
+
+    /**
      * @dataProvider validWithdrawProvider
      */
-    public function testShouldReturnMinimumAmountOfBillsForValidWithdraw(
-        $withdrawAmount, $expectedBills)
+    public function testShouldReturnMinimumAmountOfBillsForValidWithdraw($withdrawAmount, $expectedBills)
     {
         $cashDistributor = new CashDistributor();
 
         try {
-            $returnedBills =
-                $cashDistributor->getMinimalAmountOfBills($withdrawAmount);
+            $availableBills = array(100, 50, 20, 10, 5, 2);
+            $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount, $availableBills);
+        } catch(InvalidWithdrawException $e) {
+            $this->fail('Unexpected exception thrown: ' . $e->getMessage());
+        }
+
+        $this->assertEquals($expectedBills, $returnedBills,
+            "Invalid bill distribution for the given value ($withdrawAmount):");
+    }
+
+
+    /**
+     * @dataProvider validWithdrawProvider2
+     */
+    public function testShouldReturnMinimumAmountOfBillsForValidWithdraw2($withdrawAmount, $expectedBills)
+    {
+        $cashDistributor = new CashDistributor();
+
+        try {
+            $availableBills = array(30, 7, 150, 9, 12);
+            $returnedBills = $cashDistributor->getMinimalAmountOfBills($withdrawAmount, $availableBills);
         } catch(InvalidWithdrawException $e) {
             $this->fail('Unexpected exception thrown: ' . $e->getMessage());
         }

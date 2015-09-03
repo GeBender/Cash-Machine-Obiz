@@ -8,7 +8,7 @@ class CashDistributor
      *
      * @var array
      */
-    private $availableBills = array(100, 50, 20, 10, 5, 2);
+    public $availableBills = array();
 
     /**
      * @var array
@@ -21,12 +21,15 @@ class CashDistributor
      * Ex: getBills(72) => array(50 => 1, 20 => 1, 2 => 1).
      *
      * @param int $withdrawAmount
+     * @param array $availableBills
      * How much we want to withdraw from the cash distributor
      * @throws InvalidWithdrawException if the exact amount cannot be gathered with the available bills.
      * @return array Associative array representing the bills that should be distributed by the cash machine.
      */
-    public function getMinimalAmountOfBills($withdrawAmount)
+    public function getMinimalAmountOfBills($withdrawAmount, $availableBills)
     {
+        rsort($availableBills);
+        $this->availableBills = $availableBills;
         $oneBill = 0;
         while ($this->validateAmount($withdrawAmount, $oneBill) === true) {
             $oneBill = $this->GetOneBill($withdrawAmount);
@@ -34,7 +37,7 @@ class CashDistributor
             $withdrawAmount -= $oneBill;
         }
 
-        if ($this->validateWithdraw() === false) {
+        if ($this->validateWithdraw($withdrawAmount) === false) {
             throw new InvalidWithdrawException('Sorry, the exact amount cannot be gathered.');
         }
 
@@ -58,7 +61,7 @@ class CashDistributor
             }
         }
 
-         return 2;
+         return min($this->availableBills);
     }
 
 
@@ -85,8 +88,25 @@ class CashDistributor
      */
     public function validateAmount($billAmount, $leftOver)
     {
-        if ($billAmount > 0 && $leftOver !== 3 && $leftOver !== 1) {
+        if ($billAmount > 0 && $this->validateBillByBill($leftOver) === true) {
             return true;
+        }
+
+        return false;
+
+    }
+
+
+    /**
+     * Validate if a value is divisible by an available bill
+     * @param unknown $value
+     */
+    public function validateBillByBill($value)
+    {
+        foreach ($this->availableBills as $bill) {
+            if (gmp_div_r($value, $bill) === 0) {
+                return true;
+            }
         }
 
         return false;
@@ -111,11 +131,15 @@ class CashDistributor
 
     /**
      * Validate if the Withdraw is possible or not
+     * @param int $withdrawAmount
      * @return boolean
      */
-    public function validateWithdraw()
+    public function validateWithdraw($withdrawAmount)
     {
-        return (bool) count($this->bills);
+        if ($withdrawAmount >= 0 && count($this->bills) > 0) {
+            return true;
+        }
+        return false;
 
     }
 
